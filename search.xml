@@ -4,6 +4,33 @@
   
     
     <entry>
+      <title>JUC--synchronized使用</title>
+      <link href="/2024/03/12/JUC--synchronized%E4%BD%BF%E7%94%A8/"/>
+      <url>/2024/03/12/JUC--synchronized%E4%BD%BF%E7%94%A8/</url>
+      
+        <content type="html"><![CDATA[<p>####synchronized</p><p>​synchronized关键字是java中实现互斥锁的一种方式，只能以某个对象作为锁，只有获得锁的线程才能进入代码区。</p><p>​使用方法：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">synchronized</span>(对象)&#123;</span><br><span class="line">    需要加锁的代码</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>synchronized关键字加在成员方法上时，默认以本对象作为锁</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">a</span><span class="params">()</span>&#123;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>synchronized关键字加在静态方法上时，默认以本类作为锁</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">b</span><span class="params">()</span>&#123;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> JUC </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> java </tag>
+            
+            <tag> JUC </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Redis--黑马点评项目使用Redisson框架</title>
       <link href="/2024/03/11/Redis--%E9%BB%91%E9%A9%AC%E7%82%B9%E8%AF%84%E9%A1%B9%E7%9B%AE%E4%BD%BF%E7%94%A8Redisson%E6%A1%86%E6%9E%B6/"/>
       <url>/2024/03/11/Redis--%E9%BB%91%E9%A9%AC%E7%82%B9%E8%AF%84%E9%A1%B9%E7%9B%AE%E4%BD%BF%E7%94%A8Redisson%E6%A1%86%E6%9E%B6/</url>
@@ -366,7 +393,7 @@
       <link href="/2024/03/11/MIT6.S081%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AD%A6%E4%B9%A03/"/>
       <url>/2024/03/11/MIT6.S081%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E5%AD%A6%E4%B9%A03/</url>
       
-        <content type="html"><![CDATA[<h4 id="Page-faults"><a href="#Page-faults" class="headerlink" title="Page faults"></a>Page faults</h4><p>​page faults译为页面错误，是指发生在计算机操作系统中的一种情况，当程序需要访问某个页面但该页面不在内存中时，就会发生页面错误。</p><p>​关于page faults，我们需要知道的是当用户程序触发了page fault之后，会触发trap机制，系统会跳转到内核状态。并且会将引起出错的虚拟地址存放在STVAL寄存器中，将出错原因存放在SCAUSE寄存器中。(为了便于保存，会将出错原因和数字关联起来，比如15表示的是由store指令引起的page fault)</p><p>​针对page fault最直接的解决方案为给用户程序增加指定数量的空闲的物理内存(eager allocation)，但这种方式的缺点是在大多数情况下，用户程序并不知道自己会用到多少内存，因此在分配的内存中可能有大部分内存实际上根本没有使用。</p><p>​另一种更加聪明的方法是在逻辑上增加内存，只有当用户实际使用这些内存时才真正分配内存(lazy allocation)</p><p>​还有一个使用非常频繁的功能：zero fill on demand，如果你查看用户程序的地址空间，你会发现存在3个区域：test，data和BSS。其中test区域用来存放程序的指令，data区域用来存放初始化了的全局变量，BSS区域则用来存放未初始化或者初始化为0的全局变量。在计算机中会存在许多未初始化或初始化为0的page，如果每个page都映射一块物理地址，会消耗相当多的内存，并且这些内存不一定会全部使用。一种优化策略是，面对如此多的存储0的page，在物理内存中只分配一个全为0的page(该page是只读的)，让这些全为0的page都映射到这个物理page上，当某个page需要修改时，才在物理内存中重新分配一个page，并初始化为0，再重新执行指令。这样做的好处是在程序启动的时候会节省大量的物理内存，缺点是当需要修改page中的内容时，会发生page fault，需要重新分配page，这个过程时间较长(进入内核就是一个非常漫长的过程)。</p><p>​在操作系统中还有一个优化技巧：Copy On Write Fork。我们知道，当调用fork系统调用创建子进程时，这个子进程会拷贝父进程的地址空间。在shell中这种拷贝非常频繁，并且子进程往往使用exec调用另一些程序，这将会丢弃从父进程拷贝而来的地址空间。这显然是一种浪费，为了避免这种浪费，我们的做法是创建子进程时，子进程将会使用父进程的地址空间(物理地址)，并且这个地址空间将会被设置为只读。</p><p>​当子进程需要修改内存内容时，将会触发page fault，因为在向一个只读地址写入数据。接着会创建一个新的物理内存page，将触发page fault的物理地址拷贝至新的page中并映射到对应的用户程序，再将父进程的PTE设置为可读写的，最后重新执行指令</p><p>​疑问：当父进程想要修改内存内容时，系统如何操作？</p><p>​猜测：一种方案是在触发page fault后，会创建一个新的物理page，将子进程有关的内容拷贝至该page，此时父进程中有关的PTE设置为可读写的，再重新执行指令</p><p>​另一种方案是在触发page fault后，会创建一个新的物理page，将父进程有关的内容拷贝至该page，并映射父进程，再重新执行指令。</p><p>​个人认为是第一种方案，第二种方案有点鸠占鹊巢的感觉，设计的不够优雅。最主要的原因还是如果采用第二种方案，还需要执行更换页表操作，如果采用第一种方案，当子进程移入新的page后，父进程中的指令可以直接执行。</p><p><strong>以上这些优化都是操作系统在内存上的优化，其核心思想是懒加载策略，只在用户真正需要时才给它分配内存</strong></p>]]></content>
+        <content type="html"><![CDATA[<h4 id="Page-faults"><a href="#Page-faults" class="headerlink" title="Page faults"></a>Page faults</h4><p>​page faults译为页面错误，是指发生在计算机操作系统中的一种情况，当程序需要访问某个页面但该页面不在内存中时，就会发生页面错误。</p><p>​关于page faults，我们需要知道的是当用户程序触发了page fault之后，会触发trap机制，系统会跳转到内核状态。并且会将引起出错的虚拟地址存放在STVAL寄存器中，将出错原因存放在SCAUSE寄存器中。(为了便于保存，会将出错原因和数字关联起来，比如15表示的是由store指令引起的page fault)</p><p>​针对page fault最直接的解决方案为给用户程序增加指定数量的空闲的物理内存(eager allocation)，但这种方式的缺点是在大多数情况下，用户程序并不知道自己会用到多少内存，因此在分配的内存中可能有大部分内存实际上根本没有使用。</p><p>#####lazy allocation</p><p>​另一种更加聪明的方法是在逻辑上增加内存，只有当用户实际使用这些内存时才真正分配内存(lazy allocation)</p><p>#####zero fill on demand</p><p>​还有一个使用非常频繁的功能：zero fill on demand，如果你查看用户程序的地址空间，你会发现存在3个区域：test，data和BSS。其中test区域用来存放程序的指令，data区域用来存放初始化了的全局变量，BSS区域则用来存放未初始化或者初始化为0的全局变量。在计算机中会存在许多未初始化或初始化为0的page，如果每个page都映射一块物理地址，会消耗相当多的内存，并且这些内存不一定会全部使用。一种优化策略是，面对如此多的存储0的page，在物理内存中只分配一个全为0的page(该page是只读的)，让这些全为0的page都映射到这个物理page上，当某个page需要修改时，才在物理内存中重新分配一个page，并初始化为0，再重新执行指令。这样做的好处是在程序启动的时候会节省大量的物理内存，缺点是当需要修改page中的内容时，会发生page fault，需要重新分配page，这个过程时间较长(进入内核就是一个非常漫长的过程)。</p><p>#####copy on write fork</p><p>​在操作系统中还有一个优化技巧：Copy On Write Fork。我们知道，当调用fork系统调用创建子进程时，这个子进程会拷贝父进程的地址空间。在shell中这种拷贝非常频繁，并且子进程往往使用exec调用另一些程序，这将会丢弃从父进程拷贝而来的地址空间。这显然是一种浪费，为了避免这种浪费，我们的做法是创建子进程时，子进程将会使用父进程的地址空间(物理地址)，并且这个地址空间将会被设置为只读。</p><p>​当子进程需要修改内存内容时，将会触发page fault，因为在向一个只读地址写入数据。接着会创建一个新的物理内存page，将触发page fault的物理地址拷贝至新的page中并映射到对应的用户程序，再将父进程的PTE设置为可读写的，最后重新执行指令</p><p>​疑问：当父进程想要修改内存内容时，系统如何操作？</p><p>​猜测：一种方案是在触发page fault后，会创建一个新的物理page，将子进程有关的内容拷贝至该page，此时父进程中有关的PTE设置为可读写的，再重新执行指令</p><p>​另一种方案是在触发page fault后，会创建一个新的物理page，将父进程有关的内容拷贝至该page，并映射父进程，再重新执行指令。</p><p>​个人认为是第一种方案，第二种方案有点鸠占鹊巢的感觉，设计的不够优雅。最主要的原因还是如果采用第二种方案，还需要执行更换页表操作，如果采用第一种方案，当子进程移入新的page后，父进程中的指令可以直接执行。</p><h5 id="Demand-Paging"><a href="#Demand-Paging" class="headerlink" title="Demand Paging"></a>Demand Paging</h5><p>​正如之前提到的，每个用户程序都由3部分组成：text、data和BSS，对于BSS采取的优化策略是zero fill on demand。对于text和data部分我们真的有必要使用eager allocation的方式将它们全部加载到内存中吗？毕竟，用户程序可能只会使用这些数据的一部分，而且如果这些数据非常庞大将它们加载到内存中将会是一件非常耗时的工作。为什么不再等等。</p><p>​因此当我们给这些程序分配内存时，并不会给它们实际分配内存，会将它们的PTE的valid标志位设置为0，表示该条记录无效。这种情况下，当程序执行第一条指令(虚拟地址为0的指令)时，就会触发page fault，我们需要将和这些page对应的程序文件保存在某个地方(一般是外存),这样当发生page fault时page fault handler就能从程序文件中读取数据加载到内存中，并将内存page映射到page table，再重新执行指令。</p><p>​以上流程存在的一个问题为：当需要加载的数据的容量大于物理内存时，即发生OOM(out of memory)时，操作系统该如何应对。</p><p>​一种做法是将一些page撤回到外存中，空闲出来的物理内存用来存放当前需要加载的数据。这里常用的撤回策略是LRU算法，又被称为最近最少使用算法，该算法优先撤回那些最近一段时间内使用频率最低的page(可以根据access标志位来判断，该标志位会被定期清空)。这里的一种优化方案是优先撤回那些未被修改的page(dirty标志位为0)，因为这些page在撤回时不需要写回外存</p><p><strong>以上这些优化都是操作系统在内存上的优化，其核心思想是laze allocation策略，只在程序真正需要内存时才给它分配内存</strong></p><h5 id="Memory-Mapped-Files"><a href="#Memory-Mapped-Files" class="headerlink" title="Memory Mapped Files"></a>Memory Mapped Files</h5><p>​在操作系统中提供了mmap系统调用将位于外存中的文件加载到内存中，该系统调用能够接收多个参数：VA(虚拟内存地址)、len(文件大小以字节为单位)、protection(标志该块内存是共享还是私有)、一些标志位、一个打开文件的文件描述符和offset(偏移量)。具体操作就是在内存中分配一块大小为len的内存，将对应文件中从偏移量处len大小的数据加载到内存中，并结合虚拟地址和标志位生成对应的PTE。当执行完操作后，会有一个对应的unmap系统调用，表明应用程序完成了对文件的操作，该系统调用会将被修改过的block写回到外存中。</p><p>​以上行为是eager式加载，一种更加聪明的做法是使用lazy allocation来加载文件。即操作系统不会立刻将指定内容拷贝至内存，而是在一个地方记录该PTE对应的信息：比如文件描述符、偏移量等(此时PTE的valid标志位为0)，当发生page fault时才会从指定文件中将指定数据加载到内存。执行完后，同样会调用unmap。</p>]]></content>
       
       
       <categories>
@@ -673,9 +700,9 @@
             
             <tag> 算法 </tag>
             
-            <tag> 思维 </tag>
-            
             <tag> 堆 </tag>
+            
+            <tag> 思维 </tag>
             
         </tags>
       
