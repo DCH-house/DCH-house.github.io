@@ -1,0 +1,287 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Mybatis学习--9.Web项目中使用Mybatis | dch'blog</title><meta name="author" content="dch"><meta name="copyright" content="dch"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="在WEB项目中使用MyBatis(以银行转账业务为例) 使用maven新建项目，在pom文件中将打包方式改为war，并重载(reload)项目。在pom文件中引入相关依赖   编写mybatis配置文件及logback配置文件：mybatis-config.xml,XxxMapper.xml,logback.xml  右键项目，找到openMouduleSettings。双击红色路径，这一步是在项">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mybatis学习--9.Web项目中使用Mybatis">
+<meta property="og:url" content="http://example.com/2023/11/08/Mybatis%E5%AD%A6%E4%B9%A0--9.%E5%9C%A8WEB%E4%B8%AD%E5%BA%94%E7%94%A8MyBatis/index.html">
+<meta property="og:site_name" content="dch&#39;blog">
+<meta property="og:description" content="在WEB项目中使用MyBatis(以银行转账业务为例) 使用maven新建项目，在pom文件中将打包方式改为war，并重载(reload)项目。在pom文件中引入相关依赖   编写mybatis配置文件及logback配置文件：mybatis-config.xml,XxxMapper.xml,logback.xml  右键项目，找到openMouduleSettings。双击红色路径，这一步是在项">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/avator.webp">
+<meta property="article:published_time" content="2023-11-08T06:29:43.474Z">
+<meta property="article:modified_time" content="2024-03-12T09:38:30.094Z">
+<meta property="article:author" content="dch">
+<meta property="article:tag" content="Mybatis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/avator.webp"><link rel="shortcut icon" href="/img/favicon2.jpg"><link rel="canonical" href="http://example.com/2023/11/08/Mybatis%E5%AD%A6%E4%B9%A0--9.%E5%9C%A8WEB%E4%B8%AD%E5%BA%94%E7%94%A8MyBatis/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Mybatis学习--9.Web项目中使用Mybatis',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-03-12 17:38:30'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/loading.gif" data-original="/img/avator.webp" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">57</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">20</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 生活</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/shuoshuo/"><i class="fa-fw fa fa-comments-o"></i><span> 分享</span></a></li><li><a class="site-page child" href="/photos/"><i class="fa-fw fa fa-camera-retro"></i><span> 相册</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/avator.webp')"><nav id="nav"><span id="blog-info"><a href="/" title="dch'blog"><span class="site-name">dch'blog</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 生活</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/shuoshuo/"><i class="fa-fw fa fa-comments-o"></i><span> 分享</span></a></li><li><a class="site-page child" href="/photos/"><i class="fa-fw fa fa-camera-retro"></i><span> 相册</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Mybatis学习--9.Web项目中使用Mybatis</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-11-08T06:29:43.474Z" title="发表于 2023-11-08 14:29:43">2023-11-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-03-12T09:38:30.094Z" title="更新于 2024-03-12 17:38:30">2024-03-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Mybatis/">Mybatis</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">908</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>4分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Mybatis学习--9.Web项目中使用Mybatis"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h4 id="在WEB项目中使用MyBatis-以银行转账业务为例"><a href="#在WEB项目中使用MyBatis-以银行转账业务为例" class="headerlink" title="在WEB项目中使用MyBatis(以银行转账业务为例)"></a>在WEB项目中使用MyBatis(以银行转账业务为例)</h4><ul>
+<li><p>使用maven新建项目，在pom文件中将打包方式改为war，并重载(reload)项目。在pom文件中引入相关依赖</p>
+<p><img src="/img/loading.gif" data-original="/../images/Mybatis%E5%AD%A6%E4%B9%A0--9.%E5%9C%A8WEB%E4%B8%AD%E5%BA%94%E7%94%A8MyBatis/image-20231109103620253.png"></p>
+</li>
+<li><p>编写mybatis配置文件及logback配置文件：mybatis-config.xml,XxxMapper.xml,logback.xml</p>
+</li>
+<li><p>右键项目，找到openMouduleSettings。双击红色路径，这一步是在项目中引入web框架</p>
+<ul>
+<li><img src="/img/loading.gif" data-original="/../images/Mybatis%E5%AD%A6%E4%B9%A0--9.%E5%9C%A8WEB%E4%B8%AD%E5%BA%94%E7%94%A8MyBatis/image-20231109103744017.png"></li>
+</ul>
+</li>
+<li><p>在webapp目录下新建一个html文件(当作欢迎页使用)，编写前端代码。项目逻辑：从前往后</p>
+</li>
+<li><p>编写后端代码</p>
+</li>
+<li><p>采用三层架构</p>
+</li>
+<li><p>建包：web(表现层)、service(业务层)、dao(可持久层)、util(工具包)、exceptions(异常包)、pojo(javaBean)</p>
+<ul>
+<li><img src="/img/loading.gif" data-original="/../images/Mybatis%E5%AD%A6%E4%B9%A0--9.%E5%9C%A8WEB%E4%B8%AD%E5%BA%94%E7%94%A8MyBatis/image-20231109104011025.png"></li>
+</ul>
+</li>
+<li><p>在web包下创建Servlet类，接收前端用户提交的数据，并调用相关业务方法。于此同时，编写pojo类</p>
+<ul>
+<li><pre><code class="java">package com.deng.bank.web;
+
+import com.deng.bank.exceptions.moneyNotEnoughException;
+import com.deng.bank.exceptions.transferException;
+import com.deng.bank.service.AccountService;
+import com.deng.bank.service.impl.AccountServiceIm;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@WebServlet(&quot;/transfer&quot;)
+public class AccountServlet extends HttpServlet &#123;
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException &#123;
+        //get data from page
+        String fromActno = request.getParameter(&quot;fromActno&quot;);
+        String toActno = request.getParameter(&quot;toActno&quot;);
+        Double money = Double.parseDouble(request.getParameter(&quot;money&quot;));
+
+        AccountService accountService = new AccountServiceIm();
+        try &#123;
+            accountService.transfer(fromActno,toActno,money);
+            response.sendRedirect(request.getContextPath() + &quot;/Success.html&quot;);
+        &#125; catch (moneyNotEnoughException e) &#123;
+            response.sendRedirect(request.getContextPath() + &quot;/Error1.html&quot;);
+        &#125; catch (transferException e) &#123;
+            response.sendRedirect(request.getContextPath() + &quot;/Error2.html&quot;);
+        &#125;catch(Exception e)&#123;
+            response.sendRedirect(request.getContextPath() + &quot;/Error2.html&quot;);
+        &#125;
+    &#125;
+&#125;
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">* 层与层之间通过接口交互。在service包和dao包下建立接口，并创建相应的子类实现该接口</span><br><span class="line"></span><br><span class="line">  * ![](../../../笔记/MyBatis/9.在WEB中应用MyBatis.assets/image-20231109104834245.png)</span><br><span class="line"></span><br><span class="line">* 业务层调用dao层接口获取数据库连接，进行相应业务逻辑代码的编写</span><br><span class="line"></span><br><span class="line">  * ```java</span><br><span class="line">    package com.deng.bank.service.impl;</span><br><span class="line">    </span><br><span class="line">    import com.deng.bank.dao.AccountDao;</span><br><span class="line">    import com.deng.bank.dao.impl.AccountDaoIm;</span><br><span class="line">    import com.deng.bank.exceptions.moneyNotEnoughException;</span><br><span class="line">    import com.deng.bank.exceptions.transferException;</span><br><span class="line">    import com.deng.bank.pojo.Account;</span><br><span class="line">    import com.deng.bank.service.AccountService;</span><br><span class="line">    import com.deng.bank.utils.SqlSessionUtil;</span><br><span class="line">    import org.apache.ibatis.session.SqlSession;</span><br><span class="line">    </span><br><span class="line">    public class AccountServiceIm implements AccountService &#123;</span><br><span class="line">        private AccountDao accountDao = new AccountDaoIm();</span><br><span class="line">    </span><br><span class="line">        public void transfer(String fromActno,String toActno,Double money) throws moneyNotEnoughException, transferException &#123;</span><br><span class="line">            SqlSession sqlSession = SqlSessionUtil.getSqlSession();</span><br><span class="line">            Account fromAct = accountDao.select(fromActno);</span><br><span class="line">            if(fromAct.getBalance() &lt; money)&#123;</span><br><span class="line">                throw new moneyNotEnoughException(&quot;余额不足&quot;);</span><br><span class="line">            &#125;else&#123;</span><br><span class="line">                Account toAct = (Account)accountDao.select(toActno);</span><br><span class="line">                fromAct.setMoney(fromAct.getBalance() - money);</span><br><span class="line">                toAct.setMoney(toAct.getBalance() + money);</span><br><span class="line">                int count = accountDao.update(fromAct);</span><br><span class="line">                String str = null;</span><br><span class="line">                str.toString();</span><br><span class="line">                count += accountDao.update(toAct);</span><br><span class="line">                if(count != 2)&#123;</span><br><span class="line">                    throw new transferException(&quot;转账失败，未知错误&quot;);</span><br><span class="line">                &#125;</span><br><span class="line">    			</span><br><span class="line">                sqlSession.commit();</span><br><span class="line">            &#125;</span><br><span class="line">            SqlSessionUtil.close();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+</li>
+<li><p>如果我们在dao层进行事务管理，那么当业务层25-26行出现类似情况的异常时，本来应该终止转账，但由于我们将事务设置在dao层，那么fromAct账户的金额会发生改变，而toAct账户的金额却不会改变，相当于有一笔钱不翼而飞，这对银行来说是致命的错误。因此我们需要将事务管理设置在业务层。我们之前的做法是：每执行一次数据库CRUD操作就需要创建一个SqlSession对象，这显然无法做到原子性。</p>
+</li>
+<li><p>因此我们引入ThreadLocal对象，将SqlSession对象和当前线程绑定，从而实现事务的原子性</p>
+<ul>
+<li><pre><code class="java">package com.deng.bank.utils;
+
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+import java.io.IOException;
+
+public class SqlSessionUtil &#123;
+    private static SqlSessionFactory sqlSessionFactory;
+
+    static&#123;
+        try &#123;
+            sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsStream(&quot;mybatis-config.xml&quot;));
+        &#125; catch (IOException e) &#123;
+            e.printStackTrace();
+        &#125;
+    &#125;
+
+    private static ThreadLocal&lt;SqlSession&gt; local = new ThreadLocal&lt;&gt;();
+
+    public static SqlSession getSqlSession()&#123;
+        SqlSession sqlSession = local.get();
+        if(sqlSession == null)&#123;
+            sqlSessionFactory.openSession();
+        &#125;
+        return sqlSession;
+    &#125;
+
+    public static void close()&#123;
+        SqlSession sqlSession = local.get();
+        if (sqlSession!=null) &#123;
+            sqlSession.close();
+            local.remove();
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+</li>
+<li></li>
+</ul>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">dch</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2023/11/08/Mybatis%E5%AD%A6%E4%B9%A0--9.%E5%9C%A8WEB%E4%B8%AD%E5%BA%94%E7%94%A8MyBatis/">http://example.com/2023/11/08/Mybatis学习--9.在WEB中应用MyBatis/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">dch'blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Mybatis/">Mybatis</a></div><div class="post_share"><div class="social-share" data-image="/img/avator.webp" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2023/11/09/Mybatis%E5%AD%A6%E4%B9%A0--10.%E5%88%A9%E7%94%A8javassist%E5%8A%A8%E6%80%81%E7%94%9F%E6%88%90%E7%B1%BB/" title="Mybatis学习--10.利用javassist动态生成类"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Mybatis学习--10.利用javassist动态生成类</div></div></a></div><div class="next-post pull-right"><a href="/2023/11/07/Mybatis%E5%AD%A6%E4%B9%A0--7.%E5%88%A9%E7%94%A8dom4j%E8%A7%A3%E6%9E%90MyBatis%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6/" title="Mybatis学习--7.解析Mybatis配置文件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Mybatis学习--7.解析Mybatis配置文件</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2023/11/10/MyBatis%E5%AD%A6%E4%B9%A0--11.MyBatis%E4%B8%AD%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E7%94%9F%E6%88%90%E5%AE%9E%E7%8E%B0%E6%8E%A5%E5%8F%A3%E7%9A%84%E7%B1%BB/" title="Mybatis学习--11.动态代理生成实现某个接口的对象"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-11-10</div><div class="title">Mybatis学习--11.动态代理生成实现某个接口的对象</div></div></a></div><div><a href="/2023/10/30/Mybatis%E5%AD%A6%E4%B9%A0--1.%E6%A6%82%E8%BF%B0/" title="Mybatis学习--1.概述"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-10-30</div><div class="title">Mybatis学习--1.概述</div></div></a></div><div><a href="/2023/11/09/Mybatis%E5%AD%A6%E4%B9%A0--10.%E5%88%A9%E7%94%A8javassist%E5%8A%A8%E6%80%81%E7%94%9F%E6%88%90%E7%B1%BB/" title="Mybatis学习--10.利用javassist动态生成类"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-11-09</div><div class="title">Mybatis学习--10.利用javassist动态生成类</div></div></a></div><div><a href="/2023/11/12/Mybatis%E5%AD%A6%E4%B9%A0--12.MyBatis%E5%B0%8F%E6%8A%80%E5%B7%A7/" title="Mybatis学习--12.Mybatis小技巧"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-11-12</div><div class="title">Mybatis学习--12.Mybatis小技巧</div></div></a></div><div><a href="/2023/11/13/Mybatis%E5%AD%A6%E4%B9%A0--13.Mybatis%E5%8F%82%E6%95%B0%E5%A4%84%E7%90%86/" title="Mybatis学习--13.Mybatis的参数处理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-11-13</div><div class="title">Mybatis学习--13.Mybatis的参数处理</div></div></a></div><div><a href="/2023/11/14/Mybatis%E5%AD%A6%E4%B9%A0--14.Mybatis%E6%9F%A5%E8%AF%A2%E4%B8%93%E9%A2%98/" title="Mybatis学习--14.查询专题"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-11-14</div><div class="title">Mybatis学习--14.查询专题</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/loading.gif" data-original="/img/avator.webp" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">dch</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">57</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">20</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">7</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/DCH-house"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到dch的blog，在这里有技术也有有趣的文章</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9C%A8WEB%E9%A1%B9%E7%9B%AE%E4%B8%AD%E4%BD%BF%E7%94%A8MyBatis-%E4%BB%A5%E9%93%B6%E8%A1%8C%E8%BD%AC%E8%B4%A6%E4%B8%9A%E5%8A%A1%E4%B8%BA%E4%BE%8B"><span class="toc-number">1.</span> <span class="toc-text">在WEB项目中使用MyBatis(以银行转账业务为例)</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/12/JUC--synchronized%E4%BD%BF%E7%94%A8/" title="JUC--synchronized使用">JUC--synchronized使用</a><time datetime="2024-03-12T08:11:54.673Z" title="发表于 2024-03-12 16:11:54">2024-03-12</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/11/Redis--%E9%BB%91%E9%A9%AC%E7%82%B9%E8%AF%84%E9%A1%B9%E7%9B%AE%E4%BD%BF%E7%94%A8Redisson%E6%A1%86%E6%9E%B6/" title="Redis--黑马点评项目使用Redisson框架">Redis--黑马点评项目使用Redisson框架</a><time datetime="2024-03-11T13:57:17.044Z" title="发表于 2024-03-11 21:57:17">2024-03-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/11/Redis--%E9%BB%91%E9%A9%AC%E7%82%B9%E8%AF%84%E9%A1%B9%E7%9B%AE%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E9%87%8A%E6%94%BE%E5%AD%98%E5%9C%A8%E7%9A%84%E9%97%AE%E9%A2%98/" title="Redis--黑马点评项目分布式锁释放存在的问题">Redis--黑马点评项目分布式锁释放存在的问题</a><time datetime="2024-03-11T11:42:26.810Z" title="发表于 2024-03-11 19:42:26">2024-03-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/11/JUC--java%E4%B8%AD%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%8A%B6%E6%80%81/" title="JUC--java中线程的状态">JUC--java中线程的状态</a><time datetime="2024-03-11T08:38:30.543Z" title="发表于 2024-03-11 16:38:30">2024-03-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/11/JUC--%E5%AE%88%E6%8A%A4%E7%BA%BF%E7%A8%8B/" title="JUC--守护线程">JUC--守护线程</a><time datetime="2024-03-11T08:25:27.552Z" title="发表于 2024-03-11 16:25:27">2024-03-11</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By dch</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script defer="defer" id="fluttering_ribbon" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = true;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(r){r.imageLazyLoadSetting.processImages=t;var e=r.imageLazyLoadSetting.isSPA,n=r.imageLazyLoadSetting.preloadRatio||1,c=a();function a(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(){e&&(c=a());for(var t,o=0;o<c.length;o++)0<=(t=(t=c[o]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(r.innerHeight*n||document.documentElement.clientHeight*n)&&function(){var t,e,n,a,i=c[o];e=function(){c=c.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(n=new Image,a=t.getAttribute("data-original"),n.onload=function(){t.src=a,t.removeAttribute("data-original"),e&&e()},t.src!==a&&(n.src=a))}()}function i(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",i),r.addEventListener("resize",i),r.addEventListener("orientationchange",i)}(this);</script></body></html>
