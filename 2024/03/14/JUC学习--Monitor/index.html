@@ -1,0 +1,207 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>JUC--Monitor | dch'blog</title><meta name="author" content="dch"><meta name="copyright" content="dch"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="问题：什么是Monitor？ ​	–解答：Monitor译为监视器，也叫管程。是一个同步工具，基于操作系统中的互斥锁实现。可以抽象为如下结构  问题：synchronized关键字是如何实现锁机制的？ ​	–解答：java对象存储在堆中，具体来说由3部分组成：对象头、对象体和对齐字节。其中对象头中的Mark Word标记字(8字节)用来表示当前线程的锁状态。  1234&#x2F;&#x2F;临界区synchroni">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JUC--Monitor">
+<meta property="og:url" content="http://example.com/2024/03/14/JUC%E5%AD%A6%E4%B9%A0--Monitor/index.html">
+<meta property="og:site_name" content="dch&#39;blog">
+<meta property="og:description" content="问题：什么是Monitor？ ​	–解答：Monitor译为监视器，也叫管程。是一个同步工具，基于操作系统中的互斥锁实现。可以抽象为如下结构  问题：synchronized关键字是如何实现锁机制的？ ​	–解答：java对象存储在堆中，具体来说由3部分组成：对象头、对象体和对齐字节。其中对象头中的Mark Word标记字(8字节)用来表示当前线程的锁状态。  1234&#x2F;&#x2F;临界区synchroni">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/avator.webp">
+<meta property="article:published_time" content="2024-03-14T09:26:05.306Z">
+<meta property="article:modified_time" content="2024-03-15T07:51:47.563Z">
+<meta property="article:author" content="dch">
+<meta property="article:tag" content="java">
+<meta property="article:tag" content="JUC">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/avator.webp"><link rel="shortcut icon" href="/img/favicon2.jpg"><link rel="canonical" href="http://example.com/2024/03/14/JUC%E5%AD%A6%E4%B9%A0--Monitor/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'JUC--Monitor',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2024-03-15 15:51:47'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/loading.gif" data-original="/img/avator.webp" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">65</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 生活</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/shuoshuo/"><i class="fa-fw fa fa-comments-o"></i><span> 分享</span></a></li><li><a class="site-page child" href="/photos/"><i class="fa-fw fa fa-camera-retro"></i><span> 相册</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/avator.webp')"><nav id="nav"><span id="blog-info"><a href="/" title="dch'blog"><span class="site-name">dch'blog</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 生活</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/shuoshuo/"><i class="fa-fw fa fa-comments-o"></i><span> 分享</span></a></li><li><a class="site-page child" href="/photos/"><i class="fa-fw fa fa-camera-retro"></i><span> 相册</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">JUC--Monitor</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-03-14T09:26:05.306Z" title="发表于 2024-03-14 17:26:05">2024-03-14</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-03-15T07:51:47.563Z" title="更新于 2024-03-15 15:51:47">2024-03-15</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/JUC/">JUC</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>3分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="JUC--Monitor"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>问题：什么是Monitor？</p>
+<p>​	–解答：Monitor译为监视器，也叫管程。是一个同步工具，基于操作系统中的互斥锁实现。可以抽象为如下结构</p>
+<p><img src="/img/loading.gif" data-original="/../images/JUC%E5%AD%A6%E4%B9%A0--Monitor/image-20240315122058095.png" alt="image-20240315122058095"></p>
+<p>问题：synchronized关键字是如何实现锁机制的？</p>
+<p>​	–解答：java对象存储在堆中，具体来说由3部分组成：对象头、对象体和对齐字节。其中对象头中的Mark Word标记字(8字节)用来表示当前线程的锁状态。</p>
+<p><img src="/img/loading.gif" data-original="/../images/JUC%E5%AD%A6%E4%B9%A0--Monitor/image-20240315125951203.png" alt="image-20240315125951203"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//临界区</span></span><br><span class="line"><span class="keyword">synchronized</span>(Object o)&#123;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最开始，没有线程访问临界区，因此对象o的Mark Word是以下状态</p>
+<p><img src="/img/loading.gif" data-original="/../images/JUC%E5%AD%A6%E4%B9%A0--Monitor/image-20240315125855032.png" alt="image-20240315125855032"></p>
+<p>表明这是一个正常对象(即无锁状态)，此时，来了一个线程并且需要访问临界区，此时锁会升级为偏向锁，对象o的Mark Word的状态发生改变</p>
+<p><img src="/img/loading.gif" data-original="/../images/JUC%E5%AD%A6%E4%B9%A0--Monitor/image-20240315130215486.png" alt="image-20240315130215486"></p>
+<p>当一个线程访问临界区代码块并获取锁时，会在Mark Word里存储锁偏向的线程ID。在线程进入和退出临界区时不再通过CAS操作来加锁和解锁，而是检测Mark Word里是否存储着指向当前线程的偏向锁。引入偏向锁是为了在无多线程竞争的情况下尽量减少不必要的轻量级锁执行路径，因为轻量级锁的获取及释放依赖多次CAS原子指令，而偏向锁只需要在置换ThreadID的时候依赖一次CAS原子指令即可。</p>
+<p>如果此时又来了另一个线程，并且也要访问临界区，锁会升级为轻量级锁。成功获取锁的线程会在自己的栈帧中创建一个Lock Recoder的空间，会将锁对象的Mark Word中的内容复制到该空间中，而Mark Word中会存放指向该空间的指针。如果该操作失败，JVM会查看锁对象的Mark Word是否指向当前线程的栈帧，如果是说明当前线程已经获得了锁，可以进入临界区。</p>
+<p><img src="/img/loading.gif" data-original="/../images/JUC%E5%AD%A6%E4%B9%A0--Monitor/image-20240315134645348.png" alt="image-20240315134645348"></p>
+<p>当资源竞争更加激烈时，锁对象会升级为重量级锁。锁对象的Mark Word会指向一个Monitor对象，成功获取该锁的线程会被存放在Monitor的owner中，对于获取锁失败的线程都会进入EntryList中陷入阻塞状态。</p>
+<p><img src="/img/loading.gif" data-original="/../images/JUC%E5%AD%A6%E4%B9%A0--Monitor/image-20240315135926975.png" alt="image-20240315135926975"></p>
+<p><img src="/img/loading.gif" data-original="/../images/JUC%E5%AD%A6%E4%B9%A0--Monitor/image-20240315135950638.png" alt="image-20240315135950638"></p>
+<p>问题：什么是轻量级锁，什么是重量级锁？两者有什么区别？</p>
+<p>​	–解答：轻量级锁是将锁对象和线程绑定起来，轻量级锁主要用于线程分开访问临界区的情况；而重量级锁将锁对象和Monitor对象绑定，对于获取锁失败的线程直接进入自旋，如果失败进入阻塞状态，可以解决所有情况下的线程安全问题，但是性能差。轻量级锁可以升级为重量级锁</p>
+<p>问题：什么是锁膨胀？发生在什么情况下？这个过程是怎样的？</p>
+<p>​	–解答：指锁升级。这个过程对用户来说是透明的，且过程不可逆。当锁已不能满足线程间并发访问资源时，就会发生锁膨胀。</p>
+<p>问题：什么是自旋优化？有什么作用？</p>
+<p>​	–解答：自旋优化是锁的一种优化策略，指的是当线程获取锁失败时，不会立即进入阻塞状态，而是稍微等待一下再重试，重试几次都失败后再进入阻塞状态。可以减少唤醒操作，提高性能。</p>
+<p>问题：什么是偏向锁？有什么作用？</p>
+<p>​	–解答：如上所述，偏向锁是一种非常低级的锁，主要用于只有一个线程访问临界区的情况，使用偏向锁不需要进行检查和CAS操作，性能好。默认情况下，每个对象的初始状态都是偏向锁状态，而不是无锁状态。</p>
+<p>问题：为什么调用了对象的hashCode方法后，会撤销偏向锁？而轻量级锁以及重量级锁无影响？</p>
+<p>​	–解答：需要注意的是，当锁对象调用了Hashcode方法后，会禁用偏向锁，因为没有地方存放线程id。。。。。。</p>
+<p>问题：什么是批量重偏向？有什么作用？(阈值为20)</p>
+<p>问题：什么是批量撤销？发生在什么情况下？</p>
+<p>关于java中的锁可以参考以下文章：</p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/265613664">史上最全java中锁的总结！ - 知乎 (zhihu.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/SCDN_CP/article/details/86491792?ops_request_misc=%7B%22request_id%22:%22171047670816800188594181%22,%22scm%22:%2220140713.130102334..%22%7D&request_id=171047670816800188594181&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~baidu_landing_v2~default-5-86491792-null-null.142%5Ev99%5Epc_search_result_base3&utm_term=Markword&spm=1018.2226.3001.4187">Java对象结构与锁实现原理及MarkWord详解_java打印锁持有者-CSDN博客</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">dch</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2024/03/14/JUC%E5%AD%A6%E4%B9%A0--Monitor/">http://example.com/2024/03/14/JUC学习--Monitor/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">dch'blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/java/">java</a><a class="post-meta__tags" href="/tags/JUC/">JUC</a></div><div class="post_share"><div class="social-share" data-image="/img/avator.webp" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/03/15/Redis--%E9%BB%91%E9%A9%AC%E7%82%B9%E8%AF%84%E9%A1%B9%E7%9B%AE%E4%BD%BF%E7%94%A8Redis%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E5%BC%82%E6%AD%A5%E5%A4%84%E7%90%86%E7%A7%92%E6%9D%80%E8%AE%A2%E5%8D%95/" title="Redis--黑马点评项目使用Redis实现消息队列异步处理秒杀订单"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Redis--黑马点评项目使用Redis实现消息队列异步处理秒杀订单</div></div></a></div><div class="next-post pull-right"><a href="/2024/03/14/MybatisPlus%E5%AD%A6%E4%B9%A04/" title="MybatisPlus学习4--MybatisPlus中提供的插件"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">MybatisPlus学习4--MybatisPlus中提供的插件</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2024/03/12/JUC--synchronized%E4%BD%BF%E7%94%A8/" title="JUC--synchronized使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-12</div><div class="title">JUC--synchronized使用</div></div></a></div><div><a href="/2024/03/10/JUC--%E4%BD%BF%E7%94%A8Interrupt%E5%AE%9E%E7%8E%B0%E4%B8%A4%E9%98%B6%E6%AE%B5%E7%BB%88%E6%AD%A2%E7%BA%BF%E7%A8%8B/" title="JUC--使用Interrupt实现两阶段终止线程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-10</div><div class="title">JUC--使用Interrupt实现两阶段终止线程</div></div></a></div><div><a href="/2024/03/11/JUC--java%E4%B8%AD%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%8A%B6%E6%80%81/" title="JUC--java中线程的状态"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-11</div><div class="title">JUC--java中线程的状态</div></div></a></div><div><a href="/2024/03/11/JUC--%E5%AE%88%E6%8A%A4%E7%BA%BF%E7%A8%8B/" title="JUC--守护线程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-11</div><div class="title">JUC--守护线程</div></div></a></div><div><a href="/2024/03/07/JUC--%E5%88%9B%E5%BB%BA%E7%BA%BF%E7%A8%8B/" title="JUC--创建线程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-07</div><div class="title">JUC--创建线程</div></div></a></div><div><a href="/2024/03/09/JUC--%E7%BA%BF%E7%A8%8B%E8%BF%90%E8%A1%8C%E5%8E%9F%E7%90%86/" title="JUC--线程运行原理"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-03-09</div><div class="title">JUC--线程运行原理</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/loading.gif" data-original="/img/avator.webp" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">dch</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">65</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">8</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/DCH-house"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到dch的blog，在这里有技术也有有趣的文章</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/15/Redis--%E9%BB%91%E9%A9%AC%E7%82%B9%E8%AF%84%E9%A1%B9%E7%9B%AE%E4%BD%BF%E7%94%A8Redis%E5%AE%9E%E7%8E%B0%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E5%BC%82%E6%AD%A5%E5%A4%84%E7%90%86%E7%A7%92%E6%9D%80%E8%AE%A2%E5%8D%95/" title="Redis--黑马点评项目使用Redis实现消息队列异步处理秒杀订单">Redis--黑马点评项目使用Redis实现消息队列异步处理秒杀订单</a><time datetime="2024-03-15T13:18:18.724Z" title="发表于 2024-03-15 21:18:18">2024-03-15</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/14/JUC%E5%AD%A6%E4%B9%A0--Monitor/" title="JUC--Monitor">JUC--Monitor</a><time datetime="2024-03-14T09:26:05.306Z" title="发表于 2024-03-14 17:26:05">2024-03-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/14/MybatisPlus%E5%AD%A6%E4%B9%A04/" title="MybatisPlus学习4--MybatisPlus中提供的插件">MybatisPlus学习4--MybatisPlus中提供的插件</a><time datetime="2024-03-14T05:22:57.584Z" title="发表于 2024-03-14 13:22:57">2024-03-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/14/MybatisPlus%E5%AD%A6%E4%B9%A03/" title="MybatisPlus学习3">MybatisPlus学习3</a><time datetime="2024-03-14T02:04:35.777Z" title="发表于 2024-03-14 10:04:35">2024-03-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/13/Redis--%E9%BB%91%E9%A9%AC%E7%82%B9%E8%AF%84%E9%A1%B9%E7%9B%AE%E7%A7%92%E6%9D%80%E4%BC%98%E5%8C%96/" title="Redis--黑马点评项目秒杀优化">Redis--黑马点评项目秒杀优化</a><time datetime="2024-03-13T11:54:51.481Z" title="发表于 2024-03-13 19:54:51">2024-03-13</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By dch</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script defer="defer" id="fluttering_ribbon" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = true;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(r){r.imageLazyLoadSetting.processImages=t;var e=r.imageLazyLoadSetting.isSPA,n=r.imageLazyLoadSetting.preloadRatio||1,c=a();function a(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(){e&&(c=a());for(var t,o=0;o<c.length;o++)0<=(t=(t=c[o]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(r.innerHeight*n||document.documentElement.clientHeight*n)&&function(){var t,e,n,a,i=c[o];e=function(){c=c.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(n=new Image,a=t.getAttribute("data-original"),n.onload=function(){t.src=a,t.removeAttribute("data-original"),e&&e()},t.src!==a&&(n.src=a))}()}function i(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",i),r.addEventListener("resize",i),r.addEventListener("orientationchange",i)}(this);</script></body></html>
