@@ -1,0 +1,216 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>分库分表 | dch'blog</title><meta name="author" content="dch"><meta name="copyright" content="dch"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="问题：为什么要分库分表？[使用场景] ​	–解答：当一个系统的并发量非常大的时候，仅仅依赖一个数据库无法满足系统高可用、高性能以及高可扩展性的需求。一个最常见的限制条件就是数据库的连接数是有上限的，随着并发度的上升，系统性能瓶颈会集中在数据库上。 ​	另一个限制条件就是表中的数据量，当一张表中数据量达到了一定规模时，即使加了索引等优化操作查询效率依然不高。 ​	分库分表技术就是对上述问题进行优化，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分库分表">
+<meta property="og:url" content="http://example.com/2024/03/23/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/index.html">
+<meta property="og:site_name" content="dch&#39;blog">
+<meta property="og:description" content="问题：为什么要分库分表？[使用场景] ​	–解答：当一个系统的并发量非常大的时候，仅仅依赖一个数据库无法满足系统高可用、高性能以及高可扩展性的需求。一个最常见的限制条件就是数据库的连接数是有上限的，随着并发度的上升，系统性能瓶颈会集中在数据库上。 ​	另一个限制条件就是表中的数据量，当一张表中数据量达到了一定规模时，即使加了索引等优化操作查询效率依然不高。 ​	分库分表技术就是对上述问题进行优化，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/avator.webp">
+<meta property="article:published_time" content="2024-03-23T10:16:02.441Z">
+<meta property="article:modified_time" content="2024-03-25T14:13:16.552Z">
+<meta property="article:author" content="dch">
+<meta property="article:tag" content="分库分表">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/avator.webp"><link rel="shortcut icon" href="/img/favicon2.jpg"><link rel="canonical" href="http://example.com/2024/03/23/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '分库分表',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2024-03-25 22:13:16'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 7.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/loading.gif" data-original="/img/avator.webp" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">83</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">10</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 生活</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/shuoshuo/"><i class="fa-fw fa fa-comments-o"></i><span> 分享</span></a></li><li><a class="site-page child" href="/photos/"><i class="fa-fw fa fa-camera-retro"></i><span> 相册</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/avator.webp')"><nav id="nav"><span id="blog-info"><a href="/" title="dch'blog"><span class="site-name">dch'blog</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 生活</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/shuoshuo/"><i class="fa-fw fa fa-comments-o"></i><span> 分享</span></a></li><li><a class="site-page child" href="/photos/"><i class="fa-fw fa fa-camera-retro"></i><span> 相册</span></a></li><li><a class="site-page child" href="/music/"><i class="fa-fw fa fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 影视</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/links/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">分库分表</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-03-23T10:16:02.441Z" title="发表于 2024-03-23 18:16:02">2024-03-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-03-25T14:13:16.552Z" title="更新于 2024-03-25 22:13:16">2024-03-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>3分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="分库分表"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><strong>问题：为什么要分库分表？[使用场景]</strong></p>
+<p>​	–解答：当一个系统的并发量非常大的时候，仅仅依赖一个数据库无法满足系统高可用、高性能以及高可扩展性的需求。一个最常见的限制条件就是数据库的连接数是有上限的，随着并发度的上升，系统性能瓶颈会集中在数据库上。</p>
+<p>​	另一个限制条件就是表中的数据量，当一张表中数据量达到了一定规模时，即使加了索引等优化操作查询效率依然不高。</p>
+<p>​	分库分表技术就是对上述问题进行优化，以此提高系统性能。</p>
+<p><strong>问题：什么是分库分表？</strong></p>
+<p>​	–解答：分库分表其实包含了三种操作：分库、分表和分库分表。</p>
+<p><strong>分库</strong></p>
+<p>​	正如我们刚刚讲到的，当一个系统的并发量非常大的时候，仅仅依靠单个数据库无法满足需求。一种最直接的解决方案就是增加数据库的数量，这就是分库操作的实质，就是通过增加数据库的数量进而增加并发量，解决的是并发量过高的问题。比如可以将一个电商数据库拆分为订单数据库、物流数据库、商品数据库和用户数据库</p>
+<p><img src="/img/loading.gif" data-original="/../images/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/image-20240325220600013.png" alt="image-20240325220600013"></p>
+<p>如果某个数据库的并发度还非常大，可以继续执行分库操作，但维护成本也会相应的增大。</p>
+<p><strong>分表</strong></p>
+<p>​	分表操作解决的是数据量大的问题，通过将数据拆分到多个表，减少单表的数据量，提高查询效率。在分表时通常有两种方式</p>
+<ol>
+<li>水平分表：每张表的字段相同，将数据分散在多张表中，减少的是单张表的行数。在实际应用中以水平分表这种方式居多(本人只使用过水平分表)</li>
+<li>垂直分表：每张表的字段不同，减少的是单张表的列数</li>
+</ol>
+<p><strong>分库分表</strong></p>
+<p>​	如果以上两个问题同时存在即高并发量和大数据，就需要考虑分库分表操作了。不过在分库分表之前，可以先考虑⼀下能不能优化。⼀般来说，单表的⾏数如果超过了 500 万或者单表容量超过 2 GB 之后，就需要考虑做分库分表了，⼩于这个数据量的时候，遇到性能问题可以通过其他⽅式来进⾏优化。</p>
+<p>PS：以上数据量是阿⾥巴巴 Java 开发⼿册中给出的数据，仅供参考</p>
+<p><strong>在讲完了为什么要使用分库分表后以及关于分库分表的一些概念后，接下来进入重点：如何分库分表</strong></p>
+<ol>
+<li><p><strong>数据库的基本优化</strong>：做好索引、减少多表 join、减少冗余字段</p>
+</li>
+<li><p><strong>减少数据库压⼒</strong>：在数据库之前加⼀层缓存，把⼀些可以接受延迟的，以及数据库变化频率较低的内容放到本地缓存或者分布式缓存当中。</p>
+</li>
+<li><p><strong>冷热数据的隔离</strong>：即数据归档，可以将⼀些更新以及不经常使⽤的数据单独隔离出来，可以放到历史表或者离线数仓当中，减少表中的数据量来提升效率</p>
+</li>
+<li><p><strong>数据库分区</strong>：数据库分区之后，将数据存储在不同的表当中，尽量减少单表的数据量，提升查询性能。</p>
+</li>
+<li><p><strong>分布式数据库</strong>：将数据分散到多个节点上，提升容量</p>
+</li>
+</ol>
+<p><strong>问题：分区和分表有什么区别？</strong></p>
+<p>​	–解答：我们上面提过⼀个点，就是在数据库中，如果数据量⽐较⼤的话，优先考虑的是如何对数据进行优化，而不是进行分库分表，这两个过程有什么区别？我们现在来探究⼀下。首先我们先说⼀个点，就是分区和分表相同的点，都是按照⼀定的规则，对⼀张数据量特别大的表进行分解，使得表的数据量减少，从而提高查询效率。这样听起来你可能感觉没差多少，因为两者的区别都是把表进行拆分，那具体有什么差别吗？</p>
+<p>主要就是分区和分表后数据的存储⽅式发⽣了变化。</p>
+<p>这个要从 MySQL 的索引说起，在 Innodb 中（8.0之前），表存储主要依赖两个⽂件，分别是 .frm ⽂件和.ibd ⽂件。.frm⽂件⽤于存储表结构定义信息(也就是我们使用desc table得到的结构)，⽽.ibd⽂件则⽤于存储表数据。</p>
+<p>分区增加的只是.ibd文件的数量，这些.ibd文件共用同一个.frm文件；而分表不仅会增加.ibd文件并且每个.ibd文件都会有一个独立的.frm文件。简单来说就是，分区实际上还是一张表，而分表则是真正将一张表拆分为多张表。</p>
+<p><strong>分区结构</strong></p>
+<p><img src="/img/loading.gif" data-original="/../images/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/image-20240324122916989.png" alt="image-20240324122916989"></p>
+<p><strong>分表结构</strong></p>
+<p><img src="/img/loading.gif" data-original="/../images/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/image-20240324124041738.png" alt="image-20240324124041738"></p>
+<p><strong>问题：为什么不优先考虑分表呢？即分表操作有哪些问题？</strong></p>
+<p>​	–解答：</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">dch</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2024/03/23/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/">http://example.com/2024/03/23/分库分表/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">dch'blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%88%86%E5%BA%93%E5%88%86%E8%A1%A8/">分库分表</a></div><div class="post_share"><div class="social-share" data-image="/img/avator.webp" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2024/03/24/%E7%9F%AD%E9%93%BE%E6%8E%A5%E9%A1%B9%E7%9B%AE--%E4%BF%AE%E6%94%B9%E7%9F%AD%E9%93%BE%E6%8E%A5/" title="短链接--修改短链接"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">短链接--修改短链接</div></div></a></div><div class="next-post pull-right"><a href="/2024/03/22/%E7%9F%AD%E9%93%BE%E6%8E%A5%E9%A1%B9%E7%9B%AE--%E7%9F%AD%E9%93%BE%E6%8E%A5%E6%A8%A1%E5%9D%97%E4%B9%8B%E6%9F%A5%E8%AF%A2%E7%9F%AD%E9%93%BE%E6%8E%A5/" title="短链接--短链接管理之查询短链接"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">短链接--短链接管理之查询短链接</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/loading.gif" data-original="/img/avator.webp" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">dch</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">83</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">24</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">10</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/DCH-house"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">欢迎来到dch的blog，在这里有技术也有有趣的文章</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/25/%E7%9F%AD%E9%93%BE%E6%8E%A5%E9%A1%B9%E7%9B%AE--%E5%9B%9E%E6%94%B6%E7%AB%99%E6%A8%A1%E5%9D%97/" title="短链接--回收站">短链接--回收站</a><time datetime="2024-03-25T10:09:31.993Z" title="发表于 2024-03-25 18:09:31">2024-03-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/25/%E8%AF%A6%E8%A7%A3ThreadLocal/" title="详解ThreadLocal">详解ThreadLocal</a><time datetime="2024-03-25T03:18:41.148Z" title="发表于 2024-03-25 11:18:41">2024-03-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/25/%E7%AE%97%E6%B3%95--%E6%80%9D%E7%BB%B4/" title="思维">思维</a><time datetime="2024-03-25T02:52:57.289Z" title="发表于 2024-03-25 10:52:57">2024-03-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/24/%E7%9F%AD%E9%93%BE%E6%8E%A5%E9%A1%B9%E7%9B%AE--%E7%9F%AD%E9%93%BE%E6%8E%A5%E8%B7%B3%E8%BD%AC/" title="短链接--短链接跳转">短链接--短链接跳转</a><time datetime="2024-03-24T10:30:09.744Z" title="发表于 2024-03-24 18:30:09">2024-03-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/03/24/%E7%9F%AD%E9%93%BE%E6%8E%A5%E9%A1%B9%E7%9B%AE--%E4%BF%AE%E6%94%B9%E7%9F%AD%E9%93%BE%E6%8E%A5/" title="短链接--修改短链接">短链接--修改短链接</a><time datetime="2024-03-24T07:29:37.145Z" title="发表于 2024-03-24 15:29:37">2024-03-24</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By dch</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script defer="defer" id="fluttering_ribbon" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/canvas-fluttering-ribbon.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = true;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-heart" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/click-heart.min.js" async="async" mobile="false"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div>
+        <style>
+            [bg-lazy] {
+                background-image: none !important;
+                background-color: #eee !important;
+            }
+        </style>
+        <script>
+            window.imageLazyLoadSetting = {
+                isSPA: false,
+                preloadRatio: 1,
+                processImages: null,
+            };
+        </script><script>window.addEventListener("load",function(){var t=/\.(gif|jpg|jpeg|tiff|png)$/i,r=/^data:image\/[a-z]+;base64,/;Array.prototype.slice.call(document.querySelectorAll("img[data-original]")).forEach(function(a){var e=a.parentNode;"A"===e.tagName&&(e.href.match(t)||e.href.match(r))&&(e.href=a.dataset.original)})});</script><script>!function(r){r.imageLazyLoadSetting.processImages=t;var e=r.imageLazyLoadSetting.isSPA,n=r.imageLazyLoadSetting.preloadRatio||1,c=a();function a(){var t=Array.prototype.slice.call(document.querySelectorAll("img[data-original]")),e=Array.prototype.slice.call(document.querySelectorAll("[bg-lazy]"));return t.concat(e)}function t(){e&&(c=a());for(var t,o=0;o<c.length;o++)0<=(t=(t=c[o]).getBoundingClientRect()).bottom&&0<=t.left&&t.top<=(r.innerHeight*n||document.documentElement.clientHeight*n)&&function(){var t,e,n,a,i=c[o];e=function(){c=c.filter(function(t){return i!==t}),r.imageLazyLoadSetting.onImageLoaded&&r.imageLazyLoadSetting.onImageLoaded(i)},(t=i).hasAttribute("bg-lazy")?(t.removeAttribute("bg-lazy"),e&&e()):(n=new Image,a=t.getAttribute("data-original"),n.onload=function(){t.src=a,t.removeAttribute("data-original"),e&&e()},t.src!==a&&(n.src=a))}()}function i(){clearTimeout(t.tId),t.tId=setTimeout(t,500)}t(),document.addEventListener("scroll",i),r.addEventListener("resize",i),r.addEventListener("orientationchange",i)}(this);</script></body></html>
