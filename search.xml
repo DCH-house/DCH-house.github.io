@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>深入理解JUC02</title>
+      <link href="/2024/03/27/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JUC02/"/>
+      <url>/2024/03/27/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JUC02/</url>
+      
+        <content type="html"><![CDATA[]]></content>
+      
+      
+      <categories>
+          
+          <category> JUC </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 深入理解JUC </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>详解ArrayList</title>
       <link href="/2024/03/26/%E8%AF%A6%E8%A7%A3ArrayList/"/>
       <url>/2024/03/26/%E8%AF%A6%E8%A7%A3ArrayList/</url>
@@ -58,7 +83,7 @@
       <link href="/2024/03/26/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JUC01/"/>
       <url>/2024/03/26/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JUC01/</url>
       
-        <content type="html"><![CDATA[]]></content>
+        <content type="html"><![CDATA[<h5 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h5><p>​java中的JUC不仅是面试的高频考点，也是java中比较难的知识点，其中包含大量的设计技巧，内容庞大复杂。希望借该系列文章加深对JUC的理解。</p><h5 id="为什么要学习JUC"><a href="#为什么要学习JUC" class="headerlink" title="为什么要学习JUC"></a>为什么要学习JUC</h5><p>​由于java是支持多线程编程的，因此会发生线程安全问题，JUC是<strong>java.util.concurrent包的简称，即Java并发编程工具包</strong>，目的是为了更好地支持高并发任务，让开发者进行多线程编程时有效减少竞争条件和死锁线程。也就是说如果想要使用java进行并发编程，那么一定离不开JUC。</p><p>​你可能会问为什么会发生线程安全问题，这是一个相对复杂的问题，涉及计算机的底层设计。</p><h5 id="为什么会发生线程安全问题"><a href="#为什么会发生线程安全问题" class="headerlink" title="为什么会发生线程安全问题"></a>为什么会发生线程安全问题</h5><p>​为了提高系统的性能，CPU往往是支持线程并发执行的，也就是在单核CPU情况下，如果当前运行的线程被阻塞，操作系统会调度一个新的线程，从而充分利用CPU资源。</p><p><strong>可见性</strong></p><p>​在java中为了规定硬件架构与java语言的内存模型，引入JMM(java memory model)。需要注意的是JMM是一套规范，并不存在具体的代码。</p><p>​在java中每创建一个线程，jvm都会为该线程分配一个工作内存(线程栈)，这是该线程私有的，对其他线程不可见。并且JMM规定，所有变量都存储在主内存中(所有线程共享，包括堆和方法区)，每个线程想要操作某个变量(包括对象)时都需要先从主存中拷贝一份到自己的工作内存，然后在自己的工作内存中处理数据，再存放入主存中。</p><p>​这种工作模式就会发生以下问题</p><p><img src="/../images/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JUC01/image-20240327131036567.png" alt="image-20240327131036567"></p><p>在左图中A、B两个线程同时将共享数据i拷贝至自己的工作内存，然后对其进行+1操作，最终主内存的i等于1(而不是我们想要的2)</p><p>在右图中，A线程先从主内存中拷贝共享数据i至工作内存，然后对其进行操作，这时线程B想要操作i，于是去主内存中查询数据i，此时i的值是变化的，取决于线程A将数据i写回主存的时间。</p><p>以上两种情况都发生了线程安全问题。</p><p><strong>那你可能会问：为啥要给线程分配一个独立的空间呢？不分配是不是就不会发生线程安全问题呢？</strong></p><p>​首先线程在执行时需要使用栈来存储局部变量、函数参数和返回地址。你可能会问那都存在主存中不行吗？如果多个线程共享一个区域，可能会导致数据混乱和程序崩溃。</p><p>​再者，计算机的体系结构就必然会导致可见性问题，为了平衡CPU和主存间的速度不匹配，在它们中间引入了cache。线程其实是CPU的抽象，而CPU操作数据时优先从缓存中读写数据，然后再同步到主存，在同步的时间差内就可能发生线程安全问题。</p><p><strong>原子性</strong></p><p>​原子性指的是一个操作是不可中断的，要么全部执行成功，要么全部执行失败。</p><p>​我们知道CPU每次只能执行一条指令，而java中有些操作其实是由多条指令组成，比如自增操作在底层其实是由3条指令组成，那么在这个过程中就可能发生线程安全问题</p><p>​有点要注意的是：对于<code>32</code>位系统的来说，<code>byte、short、int、float、boolean、char</code>等基本数据类型的读写是原子操作，而<code>long、double</code>类型的数据，它们的读写并非原子性的！因为long和double是64位需要分两次进行读写(高32位，低32位)，不过目前商用的虚拟机都把64位数据的读写作为原子操作执行。</p><p><strong>有序性</strong></p><p>​在计算机中，编译器在不改变单线程程序语义的前提下，可以重新安排语句的执行顺序。如果不存在数据依赖(即后面执行的语句无需依赖前面语句的执行结果)，处理器可以改变语句对应机器指令的执行顺序。</p><p>编译器和处理器的重排序都会导致线程安全问题的发生。比如</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"><span class="type">boolean</span> <span class="variable">f</span> <span class="operator">=</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">methodA</span><span class="params">()</span>&#123;</span><br><span class="line">    a = <span class="number">1</span>;</span><br><span class="line">    f = <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">methodB</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(f)&#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> a + <span class="number">1</span>；</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure><p>如上述代码，线程<code>A、B</code>同时对该实例对象进行操作，其中<code>A</code>线程调用<code>methodA</code>方法，而<code>B</code>线程调用<code>methodB</code>方法，由于指令重排等原因，可能导致程序执行顺序变为如下</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">线程A                      线程B</span><br><span class="line"> methodA：                methodB：</span><br><span class="line"> 代码<span class="number">1</span>:f= <span class="literal">true</span>;           代码<span class="number">1</span>:f= <span class="literal">true</span>;</span><br><span class="line"> 代码<span class="number">2</span>:a = <span class="number">1</span>;             代码<span class="number">2</span>: a = <span class="number">0</span> ; <span class="comment">//读取到了未更新的a</span></span><br><span class="line">                          代码<span class="number">3</span>: i =  a + <span class="number">1</span>;</span><br><span class="line"></span><br></pre></td></tr></table></figure>]]></content>
       
       
       <categories>
@@ -70,7 +95,7 @@
       
         <tags>
             
-            <tag> JUC </tag>
+            <tag> 深入理解JUC </tag>
             
         </tags>
       
